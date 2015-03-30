@@ -1,14 +1,7 @@
-import scala.collection.GenSeq
-
-val sleepTimes = List(500, 1000, 1500, 2000)
-
-def sleep(time: Int) = Thread.sleep(time)
-
-def recordSleepTime(list: GenSeq[Int]) = {
-  val t = System.currentTimeMillis()
-  list foreach sleep
-  System.currentTimeMillis - t
+def doSomething(x: Int) = {
+  Thread.sleep(1000)
+  x + 10
 }
-
-recordSleepTime(sleepTimes)
-recordSleepTime(sleepTimes.par)
+val t = System.currentTimeMillis()
+((1 to 5).par map doSomething).sum
+System.currentTimeMillis - t

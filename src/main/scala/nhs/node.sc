@@ -1,4 +1,5 @@
 import nhs._
+
 val auth = Map("a3" -> "app3Id")
 
 val nodes = Vector(AppNodeMeta("a1", "a1"),
@@ -10,6 +11,6 @@ val nodes = Vector(AppNodeMeta("a1", "a1"),
 
 Utils treeToString nodes
 Utils treeToString (for {
-    node <- nodes
+  node <- nodes
   if node filter auth
-} yield node assignment auth)
+} yield node)

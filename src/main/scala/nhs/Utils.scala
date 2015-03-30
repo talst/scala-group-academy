@@ -9,11 +9,11 @@ object Utils {
     }
     def nodeToString(node: Node, indent: Int): String = node match {
       case SubMenuNode(id, name, children) =>
-        createIndent(indent - 1) + "SubMenuNode(" + id + ", " + name + "\n" +
-        createIndent(indent) + {
-        (for (child <- children)
-          yield nodeToString(child, indent + 1)) mkString "\n" + createIndent(indent)
-      } + "\n" + createIndent(indent - 1) + ")"
+        "SubMenuNode(" + id + "," + name + "\n" +
+          createIndent(indent) + {
+          (for (child <- children)
+            yield nodeToString(child, indent + 1)) mkString "\n" + createIndent(indent)
+        } + "\n" + createIndent(indent - 1) + ")"
 
       case _ => node.toString
     }
