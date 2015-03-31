@@ -5,73 +5,41 @@ sealed trait Node {
 
   def name: String
 
-  def filter(map: Map[String, String], f: (Map[String, String], Node) => Boolean = defaultFilter): Boolean = f(map, this)
+  def nonEmpty: Boolean = true
 
-  def assignment(map: Map[String, String], f: (Map[String, String], Node) => Node = defaultAssignment): Node = f(map, this)
-
-  protected def defaultFilter(map: Map[String, String], node: Node): Boolean
-
-  protected def defaultAssignment(map: Map[String, String], node: Node): Node
+  def applyAuth(auth: Map[String, String]): Node
 }
 
-case class AppNodeReal(id: String, name: String, appId: String) extends Node {
-  override protected def defaultFilter(map: Map[String, String], node: Node): Boolean =
-    map get id match {
-      case Some(newId) => true
-      case None => false
-    }
-
-  override protected def defaultAssignment(map: Map[String, String], node: Node): Node = this
+case class AppNode(id: String, name: String, appId: String) extends Node {
+  override def applyAuth(auth: Map[String, String]) = auth.get(id) match {
+    case None => EmptyNode
+    case Some(x) => AppNode(id, name, x)
+  }
 }
 
-case class AppNodeMeta(id: String, name: String) extends Node {
-  override protected def defaultFilter(map: Map[String, String], node: Node): Boolean =
-    map get id match {
-      case Some(newId) => true
-      case None => false
-    }
-
-  override protected def defaultAssignment(map: Map[String, String], node: Node): Node =
-    map get id match {
-      case Some(newId) => AppNodeReal(id, name, newId)
-      case None => EmptyNode
-    }
+case class UrlNode(id: String, name: String, target: String) extends Node {
+  override def applyAuth(auth: Map[String, String]): Node = this
 }
 
-case class UrlNode(override val id: String, name: String, target: String) extends Node {
-  override protected def defaultFilter(map: Map[String, String], node: Node): Boolean = true
-
-  override protected def defaultAssignment(map: Map[String, String], node: Node): Node = this
-}
-
-case class SubMenuNode(override val id: String, name: String, children: Vector[Node]) extends Node {
-  override protected def defaultFilter(map: Map[String, String], node: Node): Boolean = {
-    val filteredChildren = for {
+case class SubMenuNode(id: String, name: String, children: Vector[Node]) extends Node {
+  override def applyAuth(auth: Map[String, String]): Node = {
+    val filteredChildren: Vector[Node] = for {
       child <- children
-      if child filter map
-    } yield child
-    filteredChildren.nonEmpty
+      filteredChild = child.applyAuth(auth)
+      if filteredChild.nonEmpty
+    } yield filteredChild
+    SubMenuNode(id, name, filteredChildren)
   }
 
-  override protected def defaultAssignment(map: Map[String, String], node: Node): Node = {
-    val assignedChildren = for {
-      child <- children
-      if child filter map
-    } yield child assignment map
-    SubMenuNode(id, name, assignedChildren)
-  }
+  override def nonEmpty: Boolean = children.nonEmpty
 }
 
 case object EmptyNode extends Node {
-  override val id = "emptyNode"
-  override val name = "empty node"
+  override val id: String = "emptyNode"
 
-  override protected def defaultFilter(map: Map[String, String], node: Node): Boolean = false
+  override val name: String = "empty node"
 
-  override protected def defaultAssignment(map: Map[String, String], node: Node): Node = this
+  override def applyAuth(auth: Map[String, String]): Node = this
+
+  override def nonEmpty: Boolean = false
 }
-
-
-
-
-
