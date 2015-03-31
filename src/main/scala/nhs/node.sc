@@ -15,13 +15,3 @@ Utils.treeToString(for {
   filteredNode = node.applyAuth(auth)
   if filteredNode.nonEmpty
 } yield filteredNode)
-
-def noUrl(auth: Map[String, String], node: Node): Node = node match {
-  case AppNode(id, name, appId) => node.applyAuth(auth)
-  case UrlNode(id, name, target) => EmptyNode
-  case SubMenuNode(id, name, children) =>
-    SubMenuNode(id, name, children.map(noUrl(auth, _)).filter(_.nonEmpty))
-  case EmptyNode => node.applyAuth(auth)
-}
-Utils.treeToString(nodes map (noUrl(auth, _)) filter (_.nonEmpty))
-
