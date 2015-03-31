@@ -10,6 +10,7 @@ val nodes = Vector(AppNode("a1", "a1", "XXX"),
   SubMenuNode("s4", "s4", Vector(SubMenuNode("s5", "s5", Vector(SubMenuNode("s6", "s6", Vector()))))))
 
 Utils.treeToString(nodes)
+
 Utils.treeToString(for {
   node <- nodes
   filteredNode = node.applyAuth(auth)
